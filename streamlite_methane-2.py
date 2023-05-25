@@ -16,9 +16,16 @@ def main():
         body {
             background-color: #e8f5e9; /* A light green color */
         }
+        .big-title {
+            color: #1b5e20; /* A darker green color */
+            font-size: 50px;
+            text-align: center;
+            margin-bottom: 50px;
+            font-family: 'Courier New', Courier, monospace; /* A more eye-catching font */
+        }
         .title {
             color: #388e3c; /* A darker green color */
-            font-size: 50px;
+            font-size: 32px;
             text-align: center;
             margin-bottom: 50px;
             font-family: 'Courier New', Courier, monospace; /* A more eye-catching font */
@@ -33,9 +40,11 @@ def main():
             border: 1px solid #ccc;
             border-radius: 5px;
             text-align: center; /* Center the text */
+            color: #1565c0; /* Blue text color */
         }
         </style>
         """, unsafe_allow_html=True)
+
 
     # title
     st.markdown('<h1 class="title">METHANE SOURCE MAPPING </h1>', unsafe_allow_html=True)
@@ -75,75 +84,80 @@ def main():
 
         predicted_category = category_names[predicted_class]
 
-        # show results
-        st.markdown('<div class="result">', unsafe_allow_html=True)
-        st.write(f"this image corresponds to: {predicted_category}")
-
-        # cat != 3
-        if predicted_class != 3 and predicted_probability > 0.7:
-
-            image_path = "red.jpg"
-            image_result = Image.open(image_path)
-            st.image(image_result, caption='we will die')
-            st.markdown("""
-                <style>
-                body {
-                    background-color: #ff0000;
-                }
-                </style>
-                """, unsafe_allow_html=True)
-
-        elif predicted_class != 3  and predicted_probability < 0.7:
-
-            image_path = "yellow.png"
-            image_result = Image.open(image_path)
-            st.image(image_result, caption='maybe we can save us')
-            st.markdown("""
-                <style>
-                body {
-                    background-color: #FFFF00;
-                }
-                </style>
-                """, unsafe_allow_html=True)
-
-        # cat ==3
-        elif predicted_class == 3:
-            image_path = "green.png"
-            image_result = Image.open(image_path)
-            st.image(image_result, caption='all good')
-            st.markdown("""
-                <style>
-                body {
-                    background-color: #008000;
-                }
-                </style>
-                """, unsafe_allow_html=True)
-
-
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.title('this is the print of your model:')
-
-        ## we are going to show the leyers of the model for the new image
-        st.title('How we know it??')
         if 'button_pressed' not in st.session_state:
-            st.session_state.button_pressed = False
+                st.session_state.button_pressed = False
 
-        if st.button('Show model layers') or st.session_state.button_pressed:
-            st.session_state.button_pressed = True
+        if st.button('') or st.session_state.button_pressed:
+                st.session_state.button_pressed = True
+            # show results
+                st.markdown('<div class="result">', unsafe_allow_html=True)
+                st.write(f"this image corresponds to: {predicted_category}")
 
-            output_images = print_layers(x_pred=x_pred, model=model)
+                # cat != 3
+                if predicted_class != 3 and predicted_probability > 0.7:
 
-            def normalize_image(image):
-                min_val = np.min(image)
-                max_val = np.max(image)
-                normalized_image = (image - min_val) / (max_val - min_val)
-                if len(normalized_image.shape) == 2:
-                    normalized_image = np.stack((normalized_image,)*3, axis=-1)
-                return normalized_image
+                    image_path = "red.jpg"
+                    image_result = Image.open(image_path)
+                    st.image(image_result, caption='we will die')
+                    st.markdown("""
+                        <style>
+                        body {
+                            background-color: #ff0000;
+                        }
+                        </style>
+                        """, unsafe_allow_html=True)
 
-            normalized_images = [normalize_image(img) for img in output_images]
-            image_index = st.slider('Select image layer:', 0, len(normalized_images) - 1, 0)
-            st.image(normalized_images[image_index], caption=f'Layer {image_index + 1}', use_column_width=True)
+                elif predicted_class != 3  and predicted_probability < 0.7:
+
+                    image_path = "yellow.png"
+                    image_result = Image.open(image_path)
+                    st.image(image_result, caption='maybe we can save us')
+                    st.markdown("""
+                        <style>
+                        body {
+                            background-color: #FFFF00;
+                        }
+                        </style>
+                        """, unsafe_allow_html=True)
+
+                # cat ==3
+                elif predicted_class == 3:
+                    image_path = "green.png"
+                    image_result = Image.open(image_path)
+                    st.image(image_result, caption='all good')
+                    st.markdown("""
+                        <style>
+                        body {
+                            background-color: #008000;
+                        }
+                        </style>
+                        """, unsafe_allow_html=True)
+
+
+                st.markdown('</div>', unsafe_allow_html=True)
+                st.title('this is the print of your model:')
+
+                ## we are going to show the leyers of the model for the new image
+                st.title('How we know it??')
+                if 'button_pressed' not in st.session_state:
+                    st.session_state.button_pressed = False
+
+                if st.button('Show model layers') or st.session_state.button_pressed:
+                    st.session_state.button_pressed = True
+
+                    output_images = print_layers(x_pred=x_pred, model=model)
+
+                    def normalize_image(image):
+                        min_val = np.min(image)
+                        max_val = np.max(image)
+                        normalized_image = (image - min_val) / (max_val - min_val)
+                        if len(normalized_image.shape) == 2:
+                            normalized_image = np.stack((normalized_image,)*3, axis=-1)
+                        return normalized_image
+
+                    normalized_images = [normalize_image(img) for img in output_images]
+                    image_index = st.slider('Select image layer:', 0, len(normalized_images) - 1, 0)
+                    st.image(normalized_images[image_index], caption=f'Layer {image_index + 1}', use_column_width=True)
 
 if __name__ == '__main__':
     main()
