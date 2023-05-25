@@ -1,0 +1,38 @@
+from tensorflow.keras.applications import DenseNet121
+from tensorflow.keras import layers, Model
+import tensorflow as tf
+
+def build_model():
+    # Define inputs
+    input_layer = layers.Input(shape=(720, 720, 4), dtype=tf.float32)
+
+    # Separate RGB and infrared channels
+    rgb_input = input_layer[..., :3]
+    ir_input = input_layer[..., 3:4]
+
+    # Resize and normalize inputs
+    rgb_input = layers.Resizing(224, 224, interpolation='bilinear')(rgb_input)
+    rgb_input = layers.Rescaling(1./255)(rgb_input)
+    ir_input = layers.Resizing(224, 224, interpolation='bilinear')(ir_input)
+    ir_input = layers.Rescaling(1./255)(ir_input)
+
+    # Pass RGB input through DenseNet121
+    base_model_rgb = DenseNet121(include_top=False, weights='imagenet')
+    base_output_rgb = base_model_rgb(rgb_input)
+
+    # Pass IR input through a separate convnet
+    ir_conv1 = layers.Conv2D(32, 3, activation='relu')(ir_input)
+    ir_conv2 = layers.Conv2D(64, 3, activation='relu')(ir_conv1)
+    ir_maxpool = layers.MaxPooling2D()(ir_conv2)
+    base_output_ir = layers.Flatten()(ir_maxpool)
+
+    # Concatenate and process outputs
+    concatenated = layers.concatenate([layers.Flatten()(base_output_rgb), base_output_ir])
+    dense1 = layers.Dense(16, activation='relu')(concatenated)
+    final_output = layers.Dense(7, activation='sigmoid')(dense1)
+
+    # Create and compile model
+    model = Model(inputs=input_layer, outputs=final_output)
+    model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
+
+    return model
