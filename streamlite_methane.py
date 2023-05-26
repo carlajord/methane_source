@@ -10,6 +10,13 @@ def main():
     uploaded_file = st.file_uploader("Load Image", type=['png', 'jpg', 'jpeg'])
 
     result = ""
+    category_names={0: 'CAFOs',
+                    1: 'Landfills',
+                    2: 'Mines',
+                    3: 'Negative',
+                    4: 'ProcessingPlants',
+                    5: 'RefineriesAndTerminals',
+                    6: 'WWTreatment'}
 
     if uploaded_file is not None:
         image = Image.open(uploaded_file).convert('RGB')
@@ -22,10 +29,10 @@ def main():
         model_name = "model1.pkl"
         with open(model_name, 'rb') as archivo:
             model = pickle.load(archivo)
-
         prediction = model.predict(x_pred)
         predicted_class = np.argmax(prediction)
-        result = f"Image corresponds to class {predicted_class}"
+        predicted_category = category_names[predicted_class]
+        result = f"Image corresponds to category: {predicted_category}"
 
     st.write(result)
 
