@@ -168,7 +168,6 @@ def main():
                 x_pred, image_row = load_image(image_path)
                 ##do prediction
                 df_predicted,category_names, df_predicted_prob, methane_source=predict_image(x_pred, st.session_state['model'])
-                st.write(df_predicted_prob)
                 ##merge and plot prediction
                 merged_df = pd.merge(df_predicted_prob, df_predicted[['Category', 'Predicted_Label']], on='Category', how='left')
                 fig = px.bar(merged_df, y='Category', x='Predicted_Label_x',
