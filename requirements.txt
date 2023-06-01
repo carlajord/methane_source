@@ -1,0 +1,7 @@
+pandas==1.4.4
+folium==0.14.0
+Pillow==9.1.1
+numpy==1.23.4
+tensorflow==2.10.0
+requests==2.28.1
+plotly==5.9.0
