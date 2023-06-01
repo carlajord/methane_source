@@ -38,14 +38,14 @@ def edit_path(local=False):
     if local:
         df = pd.read_csv("./methane_224_data/smallsize224_all.csv")
     else:
-        df = pd.read_csv('https://storage.googleapis.com/methane_source/test_images_demo.csv', engine='pyarrow')
+        df = pd.read_csv('https://storage.googleapis.com/methane_source/test_images_demo_2.csv', engine='pyarrow')
 
     df = df.dropna()
     return df
 
 def generate_map(df):
     # Create a map
-    m = folium.Map(location=[df.Latitude.mean(), df.Longitude.mean()], zoom_start=5)
+    m = folium.Map(location=[30.11494, -90.90037], zoom_start=6)
 
     for idx, row in df.iterrows():
         # Reduce the size of the image and convert it to base64
@@ -53,11 +53,11 @@ def generate_map(df):
         image_path = row.new_path
 
         # Create the html for the popup
-        html = f'<img src="{image_path}" width=150>'
-        iframe = folium.IFrame(html, width=200+20, height=200+20)
+        html = f'<img src="{image_path}" width=360>'
+        iframe = folium.IFrame(html, width=400, height=400)
 
         # Add the marker to the map
-        popup = folium.Popup(iframe, max_width=2650)
+        popup = folium.Popup(iframe, max_width=3650)
         folium.Marker([row.Latitude, row.Longitude], color='blue',
                             fill=True, fill_color='blue', popup=popup).add_to(m)
 
@@ -137,10 +137,8 @@ def main():
             st.session_state['model'] = model
             # call to render Folium map in Streamlit
 
-    col1, col2= st.columns([2, 2])
+    col1, col2= st.columns([4, 2])
     with col1:
-        st.header("MAPPING")
-        st.title("select a point")
         with st.spinner('Map Loading...'):
             st_data = st_folium(st.session_state['map'], height=500, width=600)
             d = st_data['last_object_clicked']
@@ -171,9 +169,10 @@ def main():
                 ##merge and plot prediction
                 merged_df = pd.merge(df_predicted_prob, df_predicted[['Category', 'Predicted_Label']], on='Category', how='left')
                 fig = px.bar(merged_df, y='Category', x='Predicted_Label_x',
-                            hover_data=['Predicted_Label_y'], labels={'Predicted_Label_y':'Label'},
+                            hover_data=['Predicted_Label_y'],
                             title='Prediction Probabilities', color='Category')
-                fig.update_layout(height=400, width=500)
+                fig.update_xaxes(range=[0, 1])
+                fig.update_layout(height=400, width=500, showlegend=False)
                 st.plotly_chart(fig)
                 ## select the methane source
                 if df_predicted['Predicted_Label'].eq(0).all():
